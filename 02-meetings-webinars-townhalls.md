@@ -17,7 +17,7 @@ mermaid: true
 
 ```mermaid
 mindmap
-  root((Domain 2\n15–20%))
+  root((Domain 2 15–20%))
     Teams Meetings
       Meeting Policies
       Meeting Settings

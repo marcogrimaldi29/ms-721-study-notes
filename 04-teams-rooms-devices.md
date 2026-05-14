@@ -17,7 +17,7 @@ mermaid: true
 
 ```mermaid
 mindmap
-  root((Domain 4\n20–25%))
+  root((Domain 4 20–25%))
     Manage Rooms & Devices
       Device Settings
       Network Settings

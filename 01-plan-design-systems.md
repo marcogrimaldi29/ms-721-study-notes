@@ -17,7 +17,7 @@ mermaid: true
 
 ```mermaid
 mindmap
-  root((Domain 1\n20–25%))
+  root((Domain 1 20–25%))
     Plan Teams Meetings
       Meeting Types
       Meeting Policies

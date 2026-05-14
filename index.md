@@ -42,10 +42,10 @@ mermaid: true
 ```mermaid
 %%{init: {"theme":"dark","themeVariables":{"primaryTextColor":"#ffffff","secondaryTextColor":"#e8eaed","pie1":"#00838f","pie2":"#0097a7","pie3":"#00695c","pie4":"#4dd0e1"}}}%%
 pie title MS-721 — Official Exam Domain Weights
-    " Plan & Design Systems (20–25%)" : 22
-    " Meetings, Webinars & Town Halls (15–20%)" : 18
-    " Implement & Configure Teams Phone (30–35%)" : 32
-    " Teams Rooms & Devices (20–25%)" : 22
+    " Plan & Design Systems (20–25%)" : 25
+    " Meetings, Webinars & Town Halls (15–20%)" : 20
+    " Implement & Configure Teams Phone (30–35%)" : 35
+    " Teams Rooms & Devices (20–25%)" : 20
 ```
 
 | # | Domain | Weight | Key Focus Areas |
