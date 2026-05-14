@@ -17,7 +17,7 @@ mermaid: true
 
 ```mermaid
 mindmap
-  root((Domain 3\n30–35%))
+  root((Domain 3 30–35%))
     Phone Policies
       Dial Plans
       Calling Policies

@@ -17,7 +17,7 @@ mermaid: true
 
 ```mermaid
 mindmap
-  root((Voice & Comms\nFundamentals))
+  root((Voice & Comms Fundamentals))
     Teams Phone Architecture
       Cloud PBX
       PSTN Connectivity
