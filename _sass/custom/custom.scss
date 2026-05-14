@@ -1,0 +1,109 @@
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  ms-721-study-notes — "Teams Teal" palette                     ║
+// ║  Teal/cyan tones — evokes communications & telephony.          ║
+// ╚══════════════════════════════════════════════════════════════════╝
+//
+// HOW THE THEMING SYSTEM WORKS
+// ─────────────────────────────
+// head_custom.html (shared across repos) uses CSS custom properties
+// with fallbacks, e.g. var(--repo-accent, #8ab4f8).
+// Defining vars here overrides the fallback for this repo only.
+//
+// ── Section 1: Accent CSS variables ───────────────────────────────────
+:root {
+  --repo-accent:        #4dd0e1;
+  --repo-caveat-border: #f4b400;
+  --repo-caveat-bg:     rgba(244, 180, 0, 0.06);
+  --repo-badge-bg:      #00838f;
+  --repo-hover-bg:      rgba(0, 131, 143, 0.08);
+}
+
+// ── Section 2: Sidebar ────────────────────────────────────────────────
+body .side-bar       { background-color: #0d2137; }
+
+body .site-header    { border-bottom: 2px solid #00838f; }
+
+body .site-title     { color: #4dd0e1 !important; }
+
+
+// ── Section 3: Navigation links ───────────────────────────────────────
+body .nav-list .nav-list-link              { color: #80deea; }
+
+body .nav-list .nav-list-link:hover        { color: #4dd0e1; background-color: rgba(77, 208, 225, 0.07); }
+
+body .nav-list .nav-list-link.active       { color: #4dd0e1; background-color: rgba(77, 208, 225, 0.13); font-weight: 600; }
+
+
+// ── Section 4: Body content links ─────────────────────────────────────
+body .main-content a                       { color: #4dd0e1; }
+
+body .main-content a:hover                 { color: #80deea; text-decoration: underline; }
+
+
+// ── Section 5: Table header ───────────────────────────────────────────
+body .main-content table th                { background-color: #0d2137; color: #e2e8f0; }
+
+
+// ── Section 6: Search box focus ring ──────────────────────────────────
+body .search-input:focus                   { border-color: #00838f; box-shadow: 0 0 0 3px rgba(0, 131, 143, 0.15); }
+
+// ── Section 7: Aux / external nav links ───────────────────────────────
+body .aux-nav-list-item a                  { color: #4dd0e1; }
+
+// ── Section 8: Buttons ────────────────────────────────────────────────
+.btn.btn-primary,
+a.btn.btn-primary {
+  background:       #00838f !important;
+  background-color: #00838f !important;
+  border-color:     #00838f !important;
+  color:            #fff    !important;
+  box-shadow:       none    !important;
+}
+
+.btn.btn-primary:hover,
+.btn.btn-primary:focus,
+a.btn.btn-primary:hover,
+a.btn.btn-primary:focus {
+  background:       #0097a7 !important;
+  background-color: #0097a7 !important;
+  border-color:     #0097a7 !important;
+  color:            #fff    !important;
+  box-shadow:       none    !important;
+}
+
+.btn.btn-outline,
+a.btn.btn-outline {
+  background:       transparent !important;
+  background-color: transparent !important;
+  color:            #4dd0e1    !important;
+  border-color:     #4dd0e1    !important;
+}
+
+.btn.btn-outline:hover,
+.btn.btn-outline:focus,
+a.btn.btn-outline:hover,
+a.btn.btn-outline:focus {
+  background:       #00838f !important;
+  background-color: #00838f !important;
+  border-color:     #00838f !important;
+  color:            #fff    !important;
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// STRUCTURAL RULES — identical across all repos
+// ══════════════════════════════════════════════════════════════════════
+
+.mermaid { margin: 1.5rem 0; text-align: center; }
+
+.exam-tip {
+  border-left:   4px solid var(--repo-caveat-border, #f4b400);
+  background:    var(--repo-caveat-bg, rgba(244, 180, 0, 0.06));
+  padding:       0.75rem 1rem;
+  border-radius: 0 0.4rem 0.4rem 0;
+  margin:        1rem 0;
+}
+
+table          { font-size: 0.875rem; }
+th             { white-space: nowrap; }
+pre.highlight  { border-radius: 0.4rem; }
