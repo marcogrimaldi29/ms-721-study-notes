@@ -157,6 +157,12 @@ This site uses **[Umami](https://umami.is/)** for privacy-friendly analytics.
 
 ---
 
+## ⭐ Found These Notes Helpful?
+
+If these notes have helped you prepare for the MS-721 exam, consider giving the repo a **star** — it helps others find these resources and makes the effort of keeping them up-to-date worthwhile. Thank you! 🙌
+
+---
+
 ## ©️ Credits & Acknowledgements
 
 The **[Just the Docs](https://github.com/just-the-docs/just-the-docs)** theme is used for a clean, documentation-style layout. Licensed under [MIT](https://opensource.org/license/MIT).
