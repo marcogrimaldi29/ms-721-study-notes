@@ -124,7 +124,7 @@ Room resource accounts may need **MFA exclusions** because:
 
 | Device Type | License | Use Case |
 |-------------|---------|----------|
-| **Common area phone** | Common Area Phone license | Shared spaces — lobby, break room, factory floor |
+| **Common area phone** | **Teams Shared Space** license (named *Teams Shared Devices* until April 2026) | Shared spaces — lobby, break room, factory floor |
 | **User phone** | Teams Phone Standard (user license) | Personal desk phone for individual user |
 | **Conference phone** | Teams Rooms Basic/Pro | Conference room speakerphone |
 

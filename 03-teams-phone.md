@@ -48,6 +48,8 @@ mindmap
       Emergency Policies
       LIS Configuration
       Dynamic Emergency Calling
+      Testing with 933
+      Troubleshooting Locations
     License & Number Assignment
       Phone Standard License
       Calling Plans
@@ -68,6 +70,7 @@ mindmap
       PSTN Usage Records
       Voice Routes
       Voice Routing Policies
+      Number Inventory
       LBR & LMO
       Trunk Translation
       SBA Policies
@@ -318,7 +321,7 @@ LIS maps network elements to emergency locations:
 | Setting | Purpose |
 |---------|---------|
 | **Emergency dialing string** | Number pattern that triggers emergency routing (e.g., 911) |
-| **Emergency dial mask** | Alternative patterns that map to the emergency string (e.g., 933) |
+| **Emergency dial mask** | Alternate numbers translated into the emergency dial string (e.g., a visitor dials **112** and the call goes to **911**) |
 | **PSTN usage** | Which PSTN usage record (and therefore which SBC/gateway) routes the emergency call |
 
 > **⚠️ Exam Caveat:**
@@ -326,7 +329,58 @@ LIS maps network elements to emergency locations:
 > - For **Calling Plans**, emergency addresses must be **validated** — Direct Routing addresses are not validated by Microsoft
 > - **Security desk notification** is configured in the emergency calling policy, not the routing policy
 > - **Emergency call routing policies** are only needed for **Direct Routing** — Calling Plans and Operator Connect handle routing automatically
-> - The **emergency dial mask** (e.g., 933) can be used for testing without actually calling emergency services
+> - The **emergency dial mask** translates alternate numbers (e.g., 112) into the emergency dial string — it isn't a test number. The test number is **933** (see below)
+
+### Validate Emergency Addresses and Emergency Calling
+
+| Check | How |
+|-------|-----|
+| **Address is valid** | Create emergency addresses with the **map search** in the Teams admin center. They're marked **validated** and get **geo codes** automatically |
+| **User sees their address** | The Teams **Calls** app shows the emergency address. With **External location lookup mode** on in the emergency calling policy, users can add, edit or confirm their address there when working remotely |
+| **Test call (US and Canada)** | Calling Plan, Operator Connect and Teams Phone Mobile users dial **933**. A bot reads back the **caller ID**, the **emergency address** and whether a real call would go **straight to the PSAP or be screened** first |
+| **Test call (Direct Routing, US)** | Ask your **Emergency Routing Service Provider (ERSP)** for its test service |
+| **Security desk** | The emergency calling policy can leave the security desk **out of test calls to 933** |
+| **What clients report** | **Analytics & reports → Usage reports → Networks and Locations**: Network Site, Network Identifier and Trusted IP address tabs |
+
+**Location precedence when a US user calls 911:**
+
+1. A dynamic address from the **LIS** (defined by the admin), routed **directly to the PSAP**
+2. An address the user **confirmed or edited** for the network they're on
+3. An address **suggested by the operating system**
+4. An address the user **typed in manually**, screened first
+5. The **static registered address** of the user's number, screened first
+
+```powershell
+# Let users set their own emergency address when working remotely
+New-CsTeamsEmergencyCallingPolicy -Identity "E911WFH" -ExternalLocationLookupMode Enabled
+Grant-CsTeamsEmergencyCallingPolicy -Identity user@domain.com -PolicyName "E911WFH"
+```
+
+> **⚠️ Exam Caveat:**
+> - **933** works for **Calling Plan, Operator Connect and Teams Phone Mobile** users in the **US and Canada**. Direct Routing customers arrange testing with their ERSP
+> - The **Teams web client** doesn't support dynamic emergency calling. Block PSTN calls from it with a calling policy (**Web PSTN calling** off)
+> - Users can enter a work-from-home address in Teams **desktop** (Windows and Mac). Teams **mobile** detects location automatically but doesn't let users type one in, and Teams **phones** don't support it
+> - A static address on a **common area phone or Teams Room** goes **directly to the PSAP**, while a static address on a **user** is **screened** first
+
+### Troubleshoot Dynamic Emergency Addresses
+
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| No location on the **web client** | The web client doesn't support dynamic emergency calling | Use the desktop or mobile client, and turn off **Web PSTN calling** |
+| Subnet-based location never matches | The client's **public IP isn't in the trusted IP addresses**, or a cloud proxy changes the source IP | Add the egress IP to **trusted IP addresses**, and keep Teams traffic off source-IP-changing proxies |
+| Subnet is configured but doesn't match | The LIS needs the **network ID** (10.10.10.150/25 → **10.10.10.128**). Subnets used in network sites must also be added to the **LIS** | Fix the LIS subnet entry |
+| Client matches a **network site** but gets no address | A site match isn't a location match. For example, an IPv6 client on stateful DHCPv6 reports a **/128** prefix | Add the IPv4 subnet, the **switch/port (LLDP)** or the **Wi-Fi access point (BSSID)** to the LIS. Don't add /128 entries |
+| Wi-Fi location is ignored | **Location services** are off in the OS or Teams (BSSID matching needs location access), or the client is a Teams phone, which doesn't support Wi-Fi locations | Allow location access (Group Policy or MDM on Windows). On phones, use a subnet or LLDP |
+| Address can't be assigned to a network identifier | The address has **no geo codes**, or it's more than a couple of years old | Re-create it with **map search** (or PIN drop) |
+| New entries aren't picked up | Network setting changes take **up to 4 hours** to reach clients | Wait, then test again. Clients check their location at startup and when the network changes |
+| Direct Routing call reaches the PSAP without a location | The SBC isn't sending the location | Turn on **PIDF/LO** for the SBC (`Set-CsOnlinePSTNGateway -PidfloSupported $true`) and connect an **ERS provider** or ELIN gateway |
+| The wrong security desk is notified | A **network site** policy overrides the user's policy at that site | Check the emergency calling policy assigned to the site |
+
+> **⚠️ Exam Caveat:**
+> - The LIS checks in this order and uses the **first** match: **Wi-Fi access point → switch/port → switch → subnet**
+> - Switch/port and BSSID lookups run **even when the public IP isn't trusted**. Subnet lookups need a **trusted IP** match
+> - LLDP (switch/port) needs Windows 10 or later, LLDP software on macOS, or a Teams phone or Teams Room
+> - Use the **Networks and Locations** report → **Network Identifier** tab (Reason, Matched Network Type, Location ID) to see what the client actually matched
 
 ---
 
@@ -588,6 +642,36 @@ New-CsOnlineVoiceRoutingPolicy -Identity "US-VoicePolicy" `
 Grant-CsOnlineVoiceRoutingPolicy -Identity user@domain.com -PolicyName "US-VoicePolicy"
 ```
 
+### Phone Number Inventory for Direct Routing
+
+Direct Routing numbers stay with your carrier, but you can **upload** them to Microsoft's telephone number inventory. They then show up, assigned or not, in **Voice → Phone numbers** and in PowerShell, like Calling Plan and Operator Connect numbers.
+
+| Task | How |
+|------|-----|
+| **Upload in the Teams admin center** | **Voice → Phone numbers → Add** → **From Direct Routing** → one or more numbers, a **range**, or a **CSV** with a single `TelephoneNumber` column |
+| **Upload with PowerShell** | `New-CsOnlineDirectRoutingTelephoneNumberUploadOrder` — single numbers, a range, or a CSV with extra attributes (`LocationId`, `Tags`, `AcquiredCapabilities`, `NetworkSiteId`, `ReverseNumberLookup`) |
+| **Track the upload** | **Order history** tab, or `Get-CsOnlineTelephoneNumberOrder -OrderType DirectRoutingNumberCreation` |
+| **View numbers** | **Voice → Phone numbers**, `Get-CsPhoneNumberAssignment`, or `Export-CsAcquiredPhoneNumber` for the full list |
+| **Remove from the inventory** | `New-CsOnlineTelephoneNumberReleaseOrder`. Required **before porting** the numbers to Calling Plans, Operator Connect or Teams Phone Mobile |
+
+```powershell
+# Upload a range of Direct Routing numbers (runs in the background and returns an order ID)
+$orderId = New-CsOnlineDirectRoutingTelephoneNumberUploadOrder -StartingNumber "+14255550100" -EndingNumber "+14255550199"
+
+# Check the upload order
+Get-CsOnlineTelephoneNumberOrder -OrderType DirectRoutingNumberCreation -OrderId $orderId
+
+# List unassigned Direct Routing numbers
+Get-CsPhoneNumberAssignment -Filter "NumberType -eq 'DirectRouting' -and PstnAssignmentStatus -eq 'Unassigned'"
+```
+
+> **⚠️ Exam Caveat:**
+> - Uploading is **optional**. Assigning a Direct Routing number to a user **adds it to the inventory automatically**
+> - **Unassigned** Direct Routing numbers only appear in the Teams admin center once they're **uploaded**
+> - One upload holds up to **10,000** numbers, so split bigger lists
+> - CSV uploads with **extra attributes** only work in **PowerShell**, not in the Teams admin center
+> - After you upload numbers that were managed on-premises, **Teams** owns their configuration, and values synced from on-premises **Active Directory** are rejected
+
 ### SBC Requirements
 
 | Requirement | Details |
@@ -660,6 +744,10 @@ New-CsOnlinePSTNGateway -Fqdn "sbc01.domain.com" `
 | Users should not be able to make international calls | **Outbound call restrictions** policy or voice routing policy limiting routes |
 | Store managers are in both the Managers and Employees groups and must get the managers' calling policy | **Group policy assignment** — give the Managers group **rank 1** |
 | A user doesn't get the calling policy assigned to their group | User has a **direct** assignment — remove it so the group policy applies |
+| Admin must check a user's emergency address and routing without calling 911 | Dial **933** (Calling Plan, Operator Connect, Teams Phone Mobile — US and Canada) |
+| Remote workers must give an accurate emergency address from home | Emergency calling policy with **External location lookup mode** on |
+| Client matches its network site but gets no emergency address | IPv6 client reporting **/128** — add the IPv4 subnet, switch/port or Wi-Fi access point to the LIS |
+| Unassigned Direct Routing numbers don't appear in the Teams admin center | **Upload** them to the number inventory (`New-CsOnlineDirectRoutingTelephoneNumberUploadOrder`) |
 
 ---
 
