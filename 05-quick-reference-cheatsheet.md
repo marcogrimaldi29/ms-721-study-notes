@@ -38,9 +38,10 @@ mindmap
 |------|-------|
 | Exam passing score | **700 / 1000** |
 | Exam duration | **100 minutes** |
-| Teams meeting max attendees | **1,000** (20,000 view-only) |
+| Teams meeting max attendees | **1,000** interactive (+10,000 view-only, Enterprise plans) |
 | Webinar max attendees | **1,000** |
-| Town hall max attendees | **10,000** (20,000 with Premium) |
+| Town hall max attendees | **10,000** view-only (up to **100,000** with Attendee Capacity Pack) |
+| Group policy assignment rank | **1 = highest** (lowest number wins) |
 | Teams Rooms Basic max rooms | **25 per tenant** |
 | QoS Audio DSCP | **46 (EF)** |
 | QoS Video DSCP | **34 (AF41)** |
@@ -102,6 +103,10 @@ flowchart TD
 | User needs Teams Phone with Operator Connect | **Teams Phone Standard** (or M365 E5) — operator provides connectivity |
 | User needs Audio Conferencing | **Audio Conferencing** add-on (or M365 E5) |
 | User needs Teams Premium features | **Teams Premium** add-on |
+| User needs Copilot in meetings | **Microsoft 365 Copilot** add-on — not included in Teams Premium |
+| User needs intelligent recap only | **Teams Premium** *or* **Microsoft 365 Copilot** |
+| Organizer needs advanced webinar/town hall features | **Enterprise plan** (Office 365 / Microsoft 365 E-plans) — since April 1, 2026 |
+| Customer appointments with SMS reminders | **Microsoft Bookings** + **Teams Premium** |
 | Frontline worker with Shared Calling | **Teams Phone Standard** + **Shared Calling** policy |
 
 ### Device & Room Licenses
@@ -121,6 +126,8 @@ flowchart TD
 | Teams Phone | ❌ | ✅ |
 | Audio Conferencing | ❌ | ✅ |
 | Teams Premium | ❌ | ❌ (separate add-on) |
+| Microsoft 365 Copilot | ❌ | ❌ (separate add-on) |
+| Advanced webinar/town hall features | ✅ | ✅ (since April 1, 2026) |
 | Calling Plans | ❌ | ❌ (separate add-on) |
 
 ---
@@ -203,8 +210,11 @@ New-CsTeamsCallingPolicy -Identity "Restricted" -AllowPrivateCalling $true -Allo
 # Assign policy to user
 Grant-CsTeamsCallingPolicy -Identity user@domain.com -PolicyName "Restricted"
 
-# Assign policy to group
-New-CsGroupPolicyAssignment -GroupId "group-id" -PolicyType TeamsCallingPolicy -PolicyName "Restricted" -Rank 1
+# Assign policy to group (group policy assignment, rank 1 = highest)
+Grant-CsTeamsCallingPolicy -Group "group-id" -PolicyName "Restricted" -Rank 1
+
+# List group policy assignments for a policy type
+Get-CsGroupPolicyAssignment -PolicyType TeamsCallingPolicy
 ```
 
 ---
@@ -260,6 +270,9 @@ flowchart LR
 | "Teams Rooms Basic is free for all rooms" | **No** — limited to **25 rooms** per tenant |
 | "Resource accounts for AA/CQ are always free" | **Free license**, but need **Calling Plan or Virtual User** license for a phone number |
 | "Teams Premium is included in E5" | **No** — it's always a separate add-on |
+| "Teams Premium includes Copilot in meetings" | **No** — Copilot needs a **Microsoft 365 Copilot** license; only intelligent recap works with either |
+| "Advanced webinar features need Teams Premium" | **No** (since April 1, 2026) — included with **Enterprise plans**; branding still needs Premium |
+| "Town halls over 10,000 need Teams Premium" | **No** — they need an **Attendee Capacity Pack** (up to 100,000) |
 | "Communication Credits are optional" | **Required** for toll-free numbers and international dial-out |
 
 ### Technical Traps
@@ -282,6 +295,10 @@ flowchart LR
 | "Auto attendant Application ID = Call Queue Application ID" | **No** — they have different Application IDs |
 | "Meeting policies apply to meetings" | Meeting policies are assigned to **users**, not meetings |
 | "Webinar is a separate product" | **No** — webinar is a meeting type controlled by **meeting policies** |
+| "Group policy assignment means Windows GPO" | **No** — it's assigning a **Teams policy to a group**, ordered by **rank** |
+| "A group policy overrides a direct assignment" | **No** — **direct** beats group; group beats Global |
+| "Use the Virtual Appointments app" | **Retired** — use **Microsoft Bookings** (+ Teams Premium for SMS and queue) |
+| "Copilot in meetings always needs transcription on" | **No** — *Only during the meeting* works with transcription Off |
 
 ---
 
@@ -289,7 +306,8 @@ flowchart LR
 
 ### Domain 1 — Plan & Design (20–25%)
 - [ ] Can explain all PSTN connectivity options and when to use each
-- [ ] Know meeting types (meeting, webinar, town hall, virtual appointment)
+- [ ] Know meeting types (meeting, webinar, town hall, appointments with Microsoft Teams / Bookings)
+- [ ] Know when to recommend Teams Premium vs. Microsoft 365 Copilot
 - [ ] Can design auto attendant/call queue call flows
 - [ ] Understand emergency calling components (LIS, addresses, policies)
 - [ ] Know Teams Rooms platform differences (Windows vs. Android)
@@ -310,6 +328,7 @@ flowchart LR
 - [ ] Can create auto attendants and call queues with resource accounts
 - [ ] Understand emergency calling configuration for all connectivity types
 - [ ] Can assign phone numbers via Teams Admin Center and PowerShell
+- [ ] Can assign Teams Phone policies with group policy assignment (ranking, precedence)
 - [ ] Know Direct Routing SBC configuration requirements
 - [ ] Can configure calling features (voicemail, forwarding, delegation, groups)
 

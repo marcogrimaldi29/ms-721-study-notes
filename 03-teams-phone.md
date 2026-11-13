@@ -54,7 +54,7 @@ mindmap
       Number Assignment
       Bulk Assignment
       Policy Packages
-      Group Policy
+      Group Policy Assignment
     Calling Features
       Cloud Voicemail
       Group Call Pickup
@@ -388,16 +388,63 @@ Import-Csv "users.csv" | ForEach-Object {
 | Method | Scope | Tool |
 |--------|-------|------|
 | **Direct** | Individual user | TAC or PowerShell |
-| **Group** | Security group or M365 group | TAC or PowerShell |
-| **Batch** | CSV of users | PowerShell |
+| **Group policy assignment** | Microsoft 365 group, security group, or distribution list | TAC or PowerShell |
+| **Batch** | Up to 5,000 users per batch | TAC or PowerShell (`New-CsBatchPolicyAssignmentOperation`) |
 | **Policy package** | Role-based bundle | TAC or PowerShell |
 | **Global (default)** | All users without explicit assignment | TAC or PowerShell |
+
+### Group Policy Assignment
+
+**Group policy assignment** assigns a Teams policy (calling, caller ID, voice routing, and so on) to a **group** — members inherit it, and their policy updates automatically as they join or leave the group. It's a Teams feature: it has nothing to do with Windows Group Policy (GPO).
+
+```mermaid
+flowchart TD
+    USER["User needs an\neffective policy"]
+    Q1{"Policy assigned\ndirectly to user?"}
+    Q2{"Member of groups\nwith an assignment?"}
+    DIRECT["✅ Direct policy\nwins"]
+    RANK["✅ Group assignment\nwith rank 1 wins\n(lowest number)"]
+    GLOBAL["✅ Global\n(Org-wide default)"]
+
+    USER --> Q1
+    Q1 -->|Yes| DIRECT
+    Q1 -->|No| Q2
+    Q2 -->|Yes| RANK
+    Q2 -->|No| GLOBAL
+```
+
+| Aspect | Details |
+|--------|---------|
+| **Supported groups** | Microsoft 365 groups, security groups, distribution lists |
+| **Ranking** | Set per policy type — **1 is the highest**; no rank = lowest. Decides which group wins when a user is in several |
+| **Membership** | Only **direct members** inherit — nested groups are **not** expanded |
+| **Propagation** | Background operation — large groups can take time; recommended for groups up to **50,000** users |
+| **Teams admin center** | Policy page (e.g., **Voice → Calling policies**) → **Group policy assignment** tab → **Add group** |
+| **Change the rank (TAC)** | Remove the group assignment, then add it again with the new rank |
+| **Track progress** | **Activity log** in the Teams admin center shows group policy operations |
+
+```powershell
+# Assign a calling policy to a group with rank 1
+Grant-CsTeamsCallingPolicy -Group "sales@contoso.com" -PolicyName "SalesCallingPolicy" -Rank 1
+
+# Assign a caller ID policy to a group (group object ID, SIP or email address)
+Grant-CsCallingLineIdentity -Group "d8ebfa45-0f28-4d2d-9bcc-b158a49e2d17" -PolicyName "MainLineCallerID" -Rank 2
+
+# See which groups have a calling policy assigned
+Get-CsGroupPolicyAssignment -PolicyType TeamsCallingPolicy
+
+# Remove the group assignment
+Grant-CsTeamsCallingPolicy -Group "sales@contoso.com" -PolicyName $null
+```
 
 > **⚠️ Exam Caveat:**
 > - **PhoneNumberType** must match the connectivity method: `CallingPlan`, `DirectRouting`, or `OperatorConnect`
 > - Bulk phone number assignment via PowerShell uses `Set-CsPhoneNumberAssignment`, not the deprecated `Set-CsUser`
-> - **Policy precedence**: Direct > Group > Global default
-> - **Policy packages** assign multiple policy types at once (calling, meeting, messaging) — useful for role-based deployment
+> - **Policy precedence**: Direct > Group policy assignment (lowest rank number wins) > Global default
+> - A **direct** assignment blocks group inheritance — remove the direct policy (or **Unassign policies in bulk**) so the group policy takes effect
+> - Use `Grant-Cs<PolicyType> -Group -Rank` — `New-CsGroupPolicyAssignment` is slated for deprecation
+> - **Group policy assignment ≠ Windows Group Policy** — GPO only matters for Teams Rooms on Windows (domain GPO exclusions)
+> - **Policy packages** assign multiple policy types at once (calling, meeting, messaging) — useful for role-based deployment; **custom** packages need **Teams Premium** for each targeted user
 
 ---
 
@@ -611,6 +658,8 @@ New-CsOnlinePSTNGateway -Fqdn "sbc01.domain.com" `
 | Direct Routing SBC not connecting | Verify TLS certificate, DNS, port 5061, and certified SBC status |
 | PSTN calls need to route to different SBCs based on destination | **Voice routes** with number pattern matching + multiple SBCs |
 | Users should not be able to make international calls | **Outbound call restrictions** policy or voice routing policy limiting routes |
+| Store managers are in both the Managers and Employees groups and must get the managers' calling policy | **Group policy assignment** — give the Managers group **rank 1** |
+| A user doesn't get the calling policy assigned to their group | User has a **direct** assignment — remove it so the group policy applies |
 
 ---
 

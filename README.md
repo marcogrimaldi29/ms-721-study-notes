@@ -27,7 +27,7 @@
 
 ## 📊 Official Domain Breakdown
 
-> ⚠️ **Official ranges** from the Microsoft study guide (updated April 2026)
+> ⚠️ **Official ranges** from the Microsoft study guide (skills measured as of October 29, 2026)
 
 ```mermaid
 pie title Exam Domain Weights of the MS-721 (official ranges)
