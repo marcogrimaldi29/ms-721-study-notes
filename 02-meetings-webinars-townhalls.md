@@ -104,7 +104,7 @@ Meeting settings apply to **all meetings** in the tenant — they are not per-us
 | **Polls & forms** | Interactive polls using Microsoft Forms | Standard |
 | **Q&A** | Structured question and answer panel | Standard |
 | **Meeting apps** | Third-party apps pinned to meeting stage | Standard |
-| **Avatars** | 3D avatar representation in meetings | Teams Premium |
+| **Avatars** | 3D avatar representation in meetings | Standard |
 | **Custom branding** | Organization logo and colors in lobby/meeting | Teams Premium |
 | **Watermarks** | Watermark on video feeds and shared content | Teams Premium |
 | **End-to-end encryption** | E2EE for 1:1 and group calls/meetings | Teams Premium |
@@ -115,18 +115,47 @@ Meeting settings apply to **all meetings** in the tenant — they are not per-us
 |---------|---------|
 | **Recording storage** | OneDrive (non-channel meetings) or SharePoint (channel meetings) |
 | **Transcription** | Enables real-time captions and post-meeting transcript |
-| **Copilot dependency** | Microsoft 365 Copilot in meetings requires transcription to be enabled |
+| **Intelligent recap** | AI notes, tasks, and chapters after the meeting — needs a **Teams Premium or Microsoft 365 Copilot** license and transcription allowed in the meeting policy |
+| **Copilot setting** | Meeting policy **Copilot** setting (`-Copilot`) controls the organizer's default — see the table below |
 | **Expiration** | Recordings can auto-expire (default: 120 days, configurable) |
 | **Recording consent** | Compliance recording can be enforced via policy |
 
-### Virtual Appointments
+**Copilot meeting policy values** (Teams admin center → Meetings → Meeting policies → Recording & transcription):
+
+| Teams admin center | PowerShell (`-Copilot`) | Organizer's Default |
+|-------------------|------------------------|---------------------|
+| **On** | `Enabled` | *Only during the meeting* — organizer can change it |
+| **On with saved transcript required** *(default)* | `EnabledWithTranscript` | *During and after the meeting* — enforced, organizer can't change it |
+| **On with transcript saved by default** | `EnabledWithTranscriptDefaultOn` | *During and after the meeting* — organizer can change it |
+| **Off** | `Disabled` | *Off* — organizer can still turn Copilot on per meeting |
+
+- **Only during the meeting**: Copilot uses temporary speech-to-text data — it works **even when the transcription policy is Off**, but nothing is kept after the meeting
+- **During and after the meeting**: someone has to **start transcription** before licensed users can use Copilot
+- When an organizer sets Copilot to **Off** for a meeting, recording and transcription are turned off too
+
+```powershell
+# Copilot during and after meetings, with a saved transcript enforced
+Set-CsTeamsMeetingPolicy -Identity "ExecutiveMeetings" -Copilot EnabledWithTranscript
+```
+
+### Virtual Appointments (Bookings)
+
+The **Virtual Appointments app is no longer available** — Microsoft now points customers to **Microsoft Bookings** and the **Virtual appointment meeting template**:
 
 | Feature | Details |
 |---------|---------|
-| **Purpose** | Scheduled B2C meetings (healthcare, financial services, retail) |
-| **SMS notifications** | Send SMS reminders to external attendees |
-| **Waiting room** | Custom branded waiting experience |
-| **Advanced policies** | Lobby customization, analytics, queue management (Teams Premium) |
+| **Purpose** | Scheduled or on-demand B2C meetings (healthcare, financial services, retail, HR interviews) |
+| **Scheduling** | **Microsoft Bookings** (web or Bookings app in Teams) — booking pages, staff calendars, browser join for guests |
+| **Virtual appointment template** | Default Teams meeting template for meetings with external guests |
+| **SMS notifications** | Confirmation, update, and reminder texts to external guests — **Teams Premium** |
+| **Queue & analytics** | Queue view of appointments and usage reports in the Teams admin center — **Teams Premium** |
+| **Advanced policy** | `TeamsVirtualAppointmentsPolicy` → `EnableSmsNotifications` controls whether organizers can send SMS from the template (default `$true`) |
+
+```powershell
+# Stop a group of organizers from sending SMS from the virtual appointment template
+New-CsTeamsVirtualAppointmentsPolicy -Identity "NoSMS" -EnableSmsNotifications $false
+Grant-CsTeamsVirtualAppointmentsPolicy -Identity user@domain.com -PolicyName "NoSMS"
+```
 
 ### Cloud Video Interop (CVI) Policies
 
@@ -139,8 +168,9 @@ Meeting settings apply to **all meetings** in the tenant — they are not per-us
 > - **Meeting policies** apply to the **user** (organizer or participant), not to the meeting itself
 > - **Meeting settings** are tenant-wide and cannot be scoped to specific users
 > - **Recording storage** moved from Stream (Classic) to **OneDrive/SharePoint** — know where recordings go
-> - **Copilot in meetings** requires **both** a Copilot license **and** transcription enabled in meeting policy
-> - **Teams Premium** features (watermarks, branding, avatars) require the add-on license even for E5 users
+> - **Copilot in meetings** needs a **Microsoft 365 Copilot** license — with *Only during the meeting* it works even if transcription is Off; *During and after the meeting* needs a transcript
+> - **Intelligent recap** needs **Teams Premium or Copilot** plus transcription allowed in the meeting policy
+> - **Teams Premium** features (watermarks, branding, E2EE) require the add-on license even for E5 users — **avatars** don't need Teams Premium
 
 ---
 
@@ -214,20 +244,24 @@ Set-CsTeamsMeetingPolicy -Identity "WebinarOrganizers" `
 Grant-CsTeamsMeetingPolicy -Identity user@domain.com -PolicyName "WebinarOrganizers"
 ```
 
-### Advanced Webinar Features (Teams Premium)
+### Advanced Webinar Features (Enterprise Plans)
+
+Since **April 1, 2026**, advanced event features are included with **Enterprise plans** (Office 365 E1/E3/E5, Microsoft 365 E3/E5/E7) instead of Teams Premium. Business and Frontline plans get the foundational features only (basic registration form, chat, Q&A, reactions, attendance reports).
 
 | Feature | Description |
 |---------|-------------|
-| **Custom registration** | Branded registration page with custom questions |
-| **Waitlist** | When webinar is full, attendees join waitlist |
+| **Waitlist** | When registration is full, extra registrants join a waitlist |
 | **Manual approval** | Organizer approves/denies registrations |
-| **Reminder emails** | Automated email reminders before the event |
-| **Attendee interaction** | Controlled chat, reactions, Q&A for attendees |
+| **Registration window** | Limit when registration opens and closes |
+| **Custom emails** | Customize email templates and reminder send times |
+| **Manage what attendees see** | Spotlight who attendees see while others stay hidden |
+| **Attendee interaction** | Adds **polls** — chat, reactions, raise hand, and Q&A are on every plan |
+| **Custom branding** | Meeting themes on the event — still **Teams Premium** |
 
 > **⚠️ Exam Caveat:**
 > - **Webinar** is a meeting type, not a separate product — it's controlled through **meeting policies**
 > - **Public webinars** allow external anonymous registration — **in-org** restricts to authenticated tenant users
-> - **Advanced webinar features** (waitlist, manual approval, custom branding) require **Teams Premium**
+> - **Advanced webinar features** (waitlist, manual approval, custom emails) need an **Enterprise plan** since April 1, 2026 — **branding** (meeting themes) still needs **Teams Premium**
 
 ---
 
@@ -238,7 +272,7 @@ Grant-CsTeamsMeetingPolicy -Identity user@domain.com -PolicyName "WebinarOrganiz
 | Setting | Details |
 |---------|---------|
 | **Who can schedule** | Controlled via meeting policy |
-| **Capacity** | Up to 10,000 attendees (20,000 with Teams Premium) |
+| **Capacity** | Up to 10,000 view-only attendees — up to 100,000 with an **Attendee Capacity Pack** add-on |
 | **Roles** | Organizer, co-organizer, presenter, attendee |
 | **Q&A** | Structured Q&A with moderation |
 | **Attendee experience** | View-only — no audio/video/screen sharing for attendees |
@@ -249,7 +283,7 @@ Grant-CsTeamsMeetingPolicy -Identity user@domain.com -PolicyName "WebinarOrganiz
 |---------|---------|---------|-----------|
 | **Interaction** | Full (audio, video, chat) | Presenters + limited attendee | Presenters only; attendees view |
 | **Registration** | No | Yes | No |
-| **Max capacity** | 1,000 | 1,000 | 10,000–20,000 |
+| **Max capacity** | 1,000 | 1,000 | 10,000 (100,000 with Attendee Capacity Pack) |
 | **Q&A** | Optional | Optional | Built-in |
 | **eCDN** | No | No | Yes |
 | **Recording** | Yes | Yes | Yes |
@@ -271,14 +305,20 @@ Grant-CsTeamsMeetingPolicy -Identity user@domain.com -PolicyName "WebinarOrganiz
 | **Viva Engage** | Host town halls within Viva Engage communities — combines social engagement with broadcast |
 | **Microsoft Stream** | Town hall recordings are stored in Stream (on SharePoint) for on-demand viewing |
 
-### Advanced Town Hall Features (Teams Premium)
+### Advanced Town Hall Features (Enterprise Plans)
+
+Like webinars, advanced town hall features moved from Teams Premium to **Enterprise plans** on **April 1, 2026**:
 
 | Feature | Description |
 |---------|-------------|
-| **Capacity beyond 10,000** | Up to 20,000 attendees |
-| **Custom branding** | Organization logo and colors |
-| **RTMP-in** | Ingest external video feeds (e.g., production cameras) |
-| **VOD (Video on Demand)** | Published recording for on-demand viewing |
+| **Engaged audiences** | Chat, reactions, raise hand, polls, and Q&A for up to 3,000 attendees (10,000 view-only) |
+| **Attendee Capacity Pack** | Separate add-on assigned to organizers — scales events up to **100,000** attendees |
+| **RTMP-In** | Produce the event from an external hardware or software encoder |
+| **Microsoft eCDN** | Built-in eCDN, or pick a partner eCDN provider |
+| **Ultra-Low Latency & 1080p** | Lower delay and higher resolution for attendees |
+| **Silent Test** | Simulate a large event to test network capacity |
+| **Event insights** | Monitor attendee joins and audio/video quality during the event |
+| **Custom branding** | Meeting themes — still **Teams Premium** |
 
 > **⚠️ Exam Caveat:**
 > - **Town halls** replaced **Live Events** — know the migration path
@@ -286,6 +326,7 @@ Grant-CsTeamsMeetingPolicy -Identity user@domain.com -PolicyName "WebinarOrganiz
 > - **Attendees in town halls** are view-only — they cannot unmute, share video, or share screen
 > - **Viva Engage town halls** combine Yammer-style social engagement with the Teams broadcast experience
 > - Town hall **Q&A** is the primary attendee interaction method — it supports moderation
+> - **More than 10,000 attendees** (or more than 3,000 with engagement features) needs an **Attendee Capacity Pack**, not Teams Premium
 
 ---
 
@@ -300,7 +341,8 @@ Grant-CsTeamsMeetingPolicy -Identity user@domain.com -PolicyName "WebinarOrganiz
 | Need to restrict recording in sensitive meetings | Create **meeting policy** with AllowCloudRecording = $false |
 | Third-party Cisco video rooms need to join Teams meetings | Configure **Cloud Video Interop (CVI)** policy |
 | Meeting recordings expiring too soon | Adjust **recording expiration** setting in meeting policy |
-| Copilot not available in meetings for licensed users | Enable **transcription** in meeting policy |
+| Licensed users can use Copilot during meetings but never afterwards | Meetings run with Copilot *Only during the meeting* — set the meeting policy Copilot setting to **On with saved transcript required** (or start transcription) |
+| Town hall must reach 40,000 employees | **Attendee Capacity Pack** assigned to the organizer |
 | Need to enforce specific meeting settings for executives | Create **meeting template** with locked settings |
 | Large event causing bandwidth issues at office | Enable **Microsoft eCDN** for town halls |
 

@@ -25,14 +25,14 @@ Every report fits one of the five types in the [issue template](ISSUE_TEMPLATE.m
 | --- | --- | --- |
 | 🐛 **Bug** | A broken link, diagram, search or navigation | A Mermaid call-flow diagram doesn't render, a link to Microsoft Learn returns 404, or search can't find a term that's on the page |
 | ❌ **Incorrect content** | Text, a table, a callout, a diagram or a PowerShell example is wrong | A cmdlet or parameter that doesn't exist, or a feature listed under the wrong Teams Rooms license (Basic or Pro) |
-| 📅 **Outdated content** | Teams, the Teams admin center or the exam has changed since the page was written | A feature was renamed or retired, a setting has moved in the Teams admin center, or the study guide was revised after April 2026 and lists a skill the notes don't cover |
+| 📅 **Outdated content** | Teams, the Teams admin center or the exam has changed since the page was written | A feature was renamed or retired, a setting has moved in the Teams admin center, or the study guide was revised after October 29, 2026 and lists a skill the notes don't cover |
 | 📱 **Device or display issue** | Something looks wrong or doesn't work on a specific device, browser or screen size | A wide policy comparison table is cut off on a phone, or the navigation menu won't close on a tablet |
 | ❓ **Other** | Anything else, including ideas to make the notes easier to study | A call flow that would read better as a diagram, a comparison table worth adding, or another exam caveat |
 
 ## 🔎 Before You Open an Issue
 
 - **Search the existing issues**, [open and closed](https://github.com/marcogrimaldi29/ms-721-study-notes/issues?q=is%3Aissue). If yours is already there, add a 👍 reaction or a comment with anything new rather than opening a duplicate.
-- **Check the date.** The notes are written against the **skills measured as of April 2026**. If the "Skills measured as of" heading in the [study guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ms-721) shows a newer date, say so in the issue — it tells me which revision to compare against. The guide's **Change log** section lists what moved between revisions.
+- **Check the date.** The notes are written against the **skills measured as of October 29, 2026**. If the "Skills measured as of" heading in the [study guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ms-721) shows a newer date, say so in the issue — it tells me which revision to compare against. The guide's **Change log** section lists what moved between revisions.
 - **Check the current docs.** A quick look at the [Microsoft Teams admin documentation](https://learn.microsoft.com/en-us/MicrosoftTeams/) usually confirms whether something has changed, and gives you the link the issue asks for.
 - **One problem per issue.** Separate issues are easier to track, fix and close. Several typos on the same page can go in one issue.
 - **For a site bug, hard-refresh first** (Ctrl+F5, or Cmd+Shift+R on a Mac) in case your browser is showing an older copy of the page.

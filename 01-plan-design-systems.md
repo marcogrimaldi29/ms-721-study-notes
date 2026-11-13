@@ -20,9 +20,10 @@ mindmap
   root((Domain 1 20–25%))
     Plan Teams Meetings
       Meeting Types
+      Appointments with Teams
       Meeting Policies
       Audio Conferencing
-      Teams Premium
+      Teams Premium vs Copilot
       Policy Packages
       Policy Assignment Methods
     Plan Teams Phone
@@ -63,7 +64,7 @@ mindmap
 
 ### Meeting Types Decision Matrix
 
-| Requirement | Meeting | Webinar | Town Hall | Virtual Appointment |
+| Requirement | Meeting | Webinar | Town Hall | Appointment (Bookings) |
 |------------|---------|---------|-----------|-------------------|
 | Interactive collaboration | ✅ | ❌ | ❌ | ✅ |
 | Registration required | ❌ | ✅ | ❌ | ❌ |
@@ -72,7 +73,23 @@ mindmap
 | Breakout rooms | ✅ | ❌ | ❌ | ❌ |
 | Q&A feature | ✅ | ✅ | ✅ | ❌ |
 | eCDN support | ❌ | ❌ | ✅ | ❌ |
-| Max capacity | 1,000 | 1,000 | 10,000+ | Varies |
+| Max capacity | 1,000 interactive (+10,000 view-only on Enterprise plans) | 1,000 | 10,000 view-only (up to 100,000 with Attendee Capacity Pack) | Same as a Teams meeting |
+
+### Appointments with Microsoft Teams
+
+The study guide now says **"appointments with Microsoft Teams"** instead of "virtual appointments" — the name of Microsoft's overview page — and the **Virtual Appointments app is no longer available**. Business-to-customer appointments (bank advisor, clinician, interview) are now built from these pieces:
+
+| Option | What It Does | Licensing |
+|--------|-------------|-----------|
+| **Microsoft Bookings** | Booking pages, staff calendars, scheduled and on-demand appointments held as Teams meetings; external guests join from a browser | Microsoft 365 (basic) — **Teams Premium** adds SMS reminders, the appointment queue, and usage analytics in the Teams admin center |
+| **Virtual appointment meeting template** | Default Teams meeting template for meetings with external guests (customers, clients, patients) | Teams — SMS text notifications from the template need **Teams Premium** |
+| **Teams EHR connector** | Clinicians launch Teams visits straight from **Oracle Health** or **Epic** | Microsoft Cloud for Healthcare or the EHR connector standalone offer |
+| **Virtual appointment Graph API** | Embed appointment join links (waiting room, browser join) in your own app | Developer integration |
+
+> **⚠️ Exam Caveat:**
+> - "Virtual Appointments app" answers are outdated — recommend **Microsoft Bookings** (plus Teams Premium for SMS, queue, and analytics)
+> - **SMS notifications** only reach phone numbers in a few countries (Australia, Canada, Netherlands, UK, US)
+> - An appointment is still a **Teams meeting** — meeting policies and meeting limits apply
 
 ### Meeting Policies & Settings
 
@@ -119,31 +136,43 @@ flowchart LR
 > - Each user gets a **default dial-in number** based on their usage location
 > - **Dial-out policy** controls whether meeting organizers can dial out to PSTN numbers from meetings
 
-### Teams Premium Features
+### Teams Premium vs. Microsoft 365 Copilot
 
-| Feature | Requires Teams Premium? |
-|---------|----------------------|
-| Custom meeting branding | **Yes** |
-| Watermarks on video/content | **Yes** |
-| End-to-end encryption (E2EE) for meetings | **Yes** |
-| Sensitivity labels for meetings | **Yes** |
-| Custom meeting templates | **Yes** |
-| Advanced webinar features | **Yes** |
-| Town hall capacity beyond 10,000 | **Yes** |
-| Microsoft 365 Copilot in meetings | **Yes** (requires Copilot license too) |
+**Teams Premium** and **Microsoft 365 Copilot** are two separate per-user add-ons — neither one includes the other. The study guide now asks when to recommend each one:
+
+| Requirement | Recommend | Notes |
+|------------|-----------|-------|
+| AI meeting recap (AI notes, tasks, chapters, name mentions) | **Teams Premium** *or* **Microsoft 365 Copilot** | Intelligent recap is the one overlap — either license works (transcription must be allowed) |
+| Ask questions about a meeting during or after it | **Microsoft 365 Copilot** | Copilot in Teams meetings — not part of Teams Premium |
+| Audio recap, or recap without saving a transcript | **Microsoft 365 Copilot** | Copilot-only recap options |
+| Live translated captions and transcripts | **Teams Premium** | Organizer-level feature |
+| Custom branding (meeting themes, org backgrounds) | **Teams Premium** | |
+| Watermarks, end-to-end encryption, sensitivity labels, "who can record" | **Teams Premium** | Sensitivity labels for meetings also need an E5-level Purview subscription |
+| Admin-created meeting templates, custom policy packages | **Teams Premium** | |
+| Bookings SMS reminders, appointment queue, appointment analytics | **Teams Premium** | See Appointments with Microsoft Teams above |
+| Queues app (supervisor tools, real-time and historical queue metrics) | **Teams Premium** | Also requires a **Teams Phone** license |
+| Advanced webinars and town halls (waitlist, manual approval, eCDN, RTMP-In) | **Neither** — an **Enterprise plan** | Moved from Teams Premium to Office 365 / Microsoft 365 E-plans on **April 1, 2026** |
+
+> **⚠️ Exam Caveat:**
+> - **Copilot in meetings** needs a **Microsoft 365 Copilot** license — Teams Premium alone doesn't provide it
+> - **Intelligent recap** works with **Teams Premium or Copilot** — don't buy both just for recap
+> - Copilot isn't available in **end-to-end encrypted** meetings (E2EE is a Teams Premium feature)
+> - Since **April 1, 2026**, advanced event features come with **Enterprise plans** (Office 365 E1/E3/E5, Microsoft 365 E3/E5/E7), not Teams Premium. Teams Premium licenses bought before that date keep the old features until they expire
+> - Teams Premium is an **add-on**: users still need a Teams license
 
 ### Policy Assignment Methods
 
 | Method | Best For | Tool |
 |--------|---------|------|
 | **Direct assignment** | Individual users | Teams Admin Center or PowerShell |
-| **Group assignment** | Security groups / M365 groups | Teams Admin Center or PowerShell |
-| **Batch assignment** | Large sets of users (CSV) | PowerShell |
-| **Policy packages** | Role-based bundles (e.g., frontline worker) | Teams Admin Center |
+| **Group policy assignment** | Microsoft 365 groups, security groups, distribution lists | Teams Admin Center or PowerShell |
+| **Batch assignment** | Large sets of users (up to 5,000 per batch) | Teams Admin Center or PowerShell |
+| **Policy packages** | Role-based bundles (e.g., frontline worker) | Teams Admin Center or PowerShell |
 
 > **⚠️ Exam Caveat:**
-> - **Policy precedence**: Direct assignment > Group assignment > Global (org-wide default)
+> - **Policy precedence**: Direct assignment > Group policy assignment (lowest rank number wins) > Global (org-wide default)
 > - **Policy packages** bundle multiple policy types (calling, meeting, messaging, app setup) into a single assignable unit
+> - Built-in policy packages are free — **custom policy packages** need a **Teams Premium** license for every targeted user
 > - Teams Premium features require the **Teams Premium** license even if the user has M365 E5
 
 ---
@@ -430,6 +459,9 @@ Controls media behavior based on whether a user is on a managed or external netw
 | Large room needs content camera and dual displays | **Teams Rooms on Windows** |
 | Third-party Cisco video system needs to join Teams meetings | **Cloud Video Interop (CVI)** |
 | Emergency calls must route based on user's physical location | **Dynamic emergency calling** with **LIS** configuration |
+| Bank customers must book video sessions with advisors and get SMS reminders | **Microsoft Bookings** + **Teams Premium** (SMS notifications) |
+| Managers want to ask an AI what was decided in a meeting they missed | **Microsoft 365 Copilot** (recap alone: Teams Premium *or* Copilot) |
+| Legal team needs watermarks and E2EE on board meetings | **Teams Premium** |
 
 ---
 

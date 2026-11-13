@@ -128,15 +128,17 @@ flowchart LR
 
 | Meeting Type | Audience | Max Attendees | Key Features |
 |-------------|----------|---------------|-------------|
-| **Meeting** | Internal/external collaboration | **1,000** (up to 20,000 in view-only) | Breakout rooms, recording, transcription, Copilot |
+| **Meeting** | Internal/external collaboration | **1,000** interactive (+10,000 view-only on Enterprise plans) | Breakout rooms, recording, transcription, Copilot |
 | **Webinar** | Structured presentations with registration | **1,000** | Registration, presenter/attendee roles, engagement reports |
-| **Town Hall** | Large-scale broadcast events | **10,000** (up to 20,000 with Teams Premium) | Q&A, eCDN support, producer controls |
-| **Virtual Appointment** | External customer-facing meetings | **Varies** | SMS notifications, waiting room, custom branding |
+| **Town Hall** | Large-scale broadcast events | **10,000** view-only (up to 100,000 with Attendee Capacity Pack) | Q&A, eCDN support, producer controls |
+| **Appointment (Bookings)** | External customer-facing meetings | Same as a meeting | Booking page, browser join, SMS reminders and queue (Teams Premium) |
 
 > **⚠️ Exam Caveat:**
 > - **Webinars** support registration and structured presenter roles — meetings do not
 > - **Town halls** replace the legacy Live Events feature
-> - **Teams Premium** extends capacity and adds advanced features (custom branding, watermarks, Copilot in meetings)
+> - The **Virtual Appointments app** is retired — appointments now run through **Microsoft Bookings**
+> - **Teams Premium** adds branding, watermarks, E2EE, live translation, and intelligent recap — **Copilot in meetings** is a separate **Microsoft 365 Copilot** license
+> - Since **April 1, 2026**, advanced webinar and town hall features come with **Enterprise plans**, not Teams Premium
 > - **Audio Conferencing** adds dial-in numbers to any meeting type
 
 ---
