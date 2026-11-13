@@ -40,6 +40,7 @@ mindmap
 | Exam duration | **100 minutes** |
 | Teams meeting max attendees | **1,000** interactive (+10,000 view-only, Enterprise plans) |
 | Webinar max attendees | **1,000** |
+| Breakout rooms | Meetings and events with **up to 1,000** attendees |
 | Town hall max attendees | **10,000** view-only (up to **100,000** with Attendee Capacity Pack) |
 | Group policy assignment rank | **1 = highest** (lowest number wins) |
 | Teams Rooms Basic max rooms | **25 per tenant** |
@@ -55,6 +56,14 @@ mindmap
 | Voicemail max recording | **300 seconds** (default) |
 | CQD data upload processing | **Up to 24 hours** |
 | Recording auto-expiration | **120 days** (default, configurable) |
+| Teams Premium admin trial | **30 days**, **25** licenses |
+| Teams Premium self-service trial | **60 days** |
+| SMS included per Domestic Calling Plan user | **200** (pooled across the tenant) |
+| SMS numbers per campaign | **49** (default) |
+| Emergency calling test number (US/Canada) | **933** |
+| Network setting changes reach clients | **Up to 4 hours** |
+| Direct Routing number upload | **Up to 10,000** numbers per order |
+| SIP Gateway stale device offboarding | **30 days** signed in / **14 days** signed out |
 
 ---
 
@@ -108,12 +117,15 @@ flowchart TD
 | Organizer needs advanced webinar/town hall features | **Enterprise plan** (Office 365 / Microsoft 365 E-plans) — since April 1, 2026 |
 | Customer appointments with SMS reminders | **Microsoft Bookings** + **Teams Premium** |
 | Frontline worker with Shared Calling | **Teams Phone Standard** + **Shared Calling** policy |
+| User needs SMS in Teams | **Teams Phone** + **Calling Plan** number (US/Canada) + registered Brand and Campaign |
+| User with a SIP phone (SIP Gateway) | **Teams Phone** + PSTN connectivity + a phone number |
 
 ### Device & Room Licenses
 
 | Device Type | License |
 |-------------|---------|
-| Common area phone | **Common Area Phone** license |
+| Common area phone | **Teams Shared Space** license (named *Teams Shared Devices* until April 2026) |
+| Analog phone, fax, pager | **ATA** behind a certified SBC (Direct Routing), or a compatible ATA through SIP Gateway |
 | Teams Rooms (≤25 rooms) | **Teams Rooms Basic** (free) |
 | Teams Rooms (unlimited + management) | **Teams Rooms Pro** |
 | Resource account (AA/CQ) | **Teams Phone Resource Account** (free) |
@@ -148,6 +160,12 @@ flowchart TD
 | Manage device compliance | **Microsoft Intune** (intune.microsoft.com) |
 | Manage SBC health | **Teams Admin Center** → Voice → Direct Routing |
 | Configure bookable desks | **Microsoft Places** |
+| Start a Teams Premium trial, approve license requests | **Teams Admin Center** → Teams Premium |
+| Port numbers to Calling Plans | **Teams Admin Center** → Voice → Phone numbers → Port |
+| Enable SMS on a Calling Plan number | **Teams Admin Center** → Voice → Phone numbers → Enable SMS |
+| Upload Direct Routing numbers | **Teams Admin Center** → Voice → Phone numbers → Add → From Direct Routing |
+| Turn on Advanced calling for common area phones | **Teams Admin Center** → Teams devices → Phones → Configuration profiles |
+| See which network/location clients matched | **Teams Admin Center** → Analytics & reports → Usage reports → Networks and Locations |
 
 ---
 
@@ -167,6 +185,12 @@ Set-CsPhoneNumberAssignment -Identity user@domain.com -PhoneNumber "+14255551234
 
 # Remove number
 Remove-CsPhoneNumberAssignment -Identity user@domain.com -PhoneNumber "+14255551234" -PhoneNumberType DirectRouting
+
+# Upload Direct Routing numbers to the number inventory (returns an order ID)
+New-CsOnlineDirectRoutingTelephoneNumberUploadOrder -StartingNumber "+14255550100" -EndingNumber "+14255550199"
+
+# Check a Direct Routing upload order
+Get-CsOnlineTelephoneNumberOrder -OrderType DirectRoutingNumberCreation -OrderId "<orderId>"
 ```
 
 ### Direct Routing
@@ -242,9 +266,12 @@ flowchart LR
 | **Emergency address** | Physical civic address | All |
 | **Place** | Floor/wing within address | All |
 | **LIS** | Maps network → location | All (required for dynamic) |
-| **Emergency calling policy** | Security desk notification | All |
+| **Emergency calling policy** | Security desk notification, **External location lookup mode** (users set their own address) | All |
 | **Emergency call routing policy** | SBC routing for 911/112 | **Direct Routing only** |
-| **Emergency dial mask** | Test number (e.g., 933) | Direct Routing |
+| **Emergency dial mask** | Alternate number translated to the dial string (e.g., 112 → 911) | Direct Routing |
+| **933** | Test call — a bot reads back caller ID, address and routing | Calling Plan, Operator Connect, Teams Phone Mobile (US/Canada) |
+| **Trusted IP addresses** | Needed for **subnet**-based dynamic locations | All |
+| **PIDF/LO on the SBC** | Sends the caller's location with the emergency call | **Direct Routing** |
 
 ---
 
@@ -274,6 +301,9 @@ flowchart LR
 | "Advanced webinar features need Teams Premium" | **No** (since April 1, 2026) — included with **Enterprise plans**; branding still needs Premium |
 | "Town halls over 10,000 need Teams Premium" | **No** — they need an **Attendee Capacity Pack** (up to 100,000) |
 | "Communication Credits are optional" | **Required** for toll-free numbers and international dial-out |
+| "Common area phones need the Common Area Phone license" | Use the **Teams Shared Space** license (named Teams Shared Devices until April 2026) |
+| "A user can get a toll-free number" | **No** — toll-free numbers are **Voice app** or **Conference** service numbers only |
+| "SMS works on any Teams number" | **No** — only **Calling Plan** numbers in the **US and Canada**, after Brand and Campaign registration |
 
 ### Technical Traps
 
@@ -285,6 +315,10 @@ flowchart LR
 | "Content camera works on Android" | **No** — content camera is **Windows only** |
 | "Proximity join uses Wi-Fi" | **No** — proximity join uses **Bluetooth** |
 | "Emergency call routing policy is for all connectivity" | **No** — only for **Direct Routing**; Calling Plans/Operator Connect handle it automatically |
+| "933 is the emergency dial mask for testing" | **No** — 933 is a test number for Calling Plan/Operator Connect/Teams Phone Mobile; a **dial mask** translates alternate numbers like 112 |
+| "A network site match means the client has an emergency address" | **No** — site match gives policies; the **LIS** match gives the location |
+| "Webinars don't support breakout rooms" | **They do** — in events with up to **1,000** attendees (not town halls) |
+| "Analog devices sign in to Teams" | **No** — they connect through an **ATA** (behind a certified SBC or via SIP Gateway) |
 
 ### Configuration Traps
 
@@ -312,6 +346,9 @@ flowchart LR
 - [ ] Understand emergency calling components (LIS, addresses, policies)
 - [ ] Know Teams Rooms platform differences (Windows vs. Android)
 - [ ] Can explain SBC requirements for Direct Routing
+- [ ] Can plan user vs. service numbers, number porting and SMS in Teams
+- [ ] Know when to use ATAs, SIP Gateway and certified contact center solutions
+- [ ] Know Advanced calling and other features on shared devices (Teams Shared Space)
 - [ ] Understand network assessment tools and QoS configuration
 
 ### Domain 2 — Meetings & Events (15–20%)
@@ -320,6 +357,7 @@ flowchart LR
 - [ ] Understand webinar vs. town hall differences
 - [ ] Can configure eCDN for town halls
 - [ ] Know Teams Premium features and licensing
+- [ ] Know the Teams Premium trials (admin 30 days/25 licenses, self-service 60 days) and the Teams Premium dashboard
 - [ ] Understand recording storage (OneDrive vs. SharePoint)
 
 ### Domain 3 — Teams Phone (30–35%)
@@ -327,6 +365,8 @@ flowchart LR
 - [ ] Know the voice routing chain (dial plan → VRP → PSTN usage → voice route → SBC)
 - [ ] Can create auto attendants and call queues with resource accounts
 - [ ] Understand emergency calling configuration for all connectivity types
+- [ ] Can validate emergency calling (933, Networks and Locations report) and troubleshoot dynamic locations
+- [ ] Can upload Direct Routing numbers to the phone number inventory
 - [ ] Can assign phone numbers via Teams Admin Center and PowerShell
 - [ ] Can assign Teams Phone policies with group policy assignment (ranking, precedence)
 - [ ] Know Direct Routing SBC configuration requirements

@@ -27,6 +27,7 @@ mindmap
       Polls & Q&A
       Recording & Transcription
       Teams Premium Features
+      Teams Premium Trial & Dashboard
       Virtual Appointments
       CVI Policies
     Audio Conferencing
@@ -108,6 +109,31 @@ Meeting settings apply to **all meetings** in the tenant — they are not per-us
 | **Custom branding** | Organization logo and colors in lobby/meeting | Teams Premium |
 | **Watermarks** | Watermark on video feeds and shared content | Teams Premium |
 | **End-to-end encryption** | E2EE for 1:1 and group calls/meetings | Teams Premium |
+
+### Evaluate Teams Premium
+
+An organization can try Teams Premium before buying it, then manage it from the **Teams Premium dashboard** in the Teams admin center:
+
+| Trial | Who Starts It | Length | Licenses |
+|-------|---------------|--------|----------|
+| **Admin trial** (discovery trial) | An admin: Teams admin center → **Teams Premium** → **Try for free**, or Microsoft 365 admin center → **Marketplace** → *Microsoft Teams Premium* → **Start free trial** | **30 days** | **25** licenses to assign |
+| **Self-service trial** | A user, from Teams desktop or web (admins can't start one) | **60 days** | The user's own |
+
+**Teams Premium dashboard** (Teams admin center → **Teams Premium**):
+
+| Tab | What It Shows |
+|-----|---------------|
+| **Overview** | Licenses, license requests, feature advisor and feature usage at a glance |
+| **Licenses** | Assign licenses, **approve or reject license requests**, and see users **recommended** for a license |
+| **Usage reports** | How much Teams Premium features are used (also under **Analytics & reports → Usage reports → Teams Premium feature usage**) |
+| **Feature advisor** | Teams Premium features you still need to set up for your users |
+
+> **⚠️ Exam Caveat:**
+> - Admins can manage Teams Premium features only when the tenant has **at least one active Teams Premium license**, trial or paid
+> - The admin trial isn't offered if the tenant **already used it** or has a **paid** subscription
+> - When a trial ends, users lose Teams Premium features **immediately**. Custom templates and backgrounds stay in the tenant but are **grayed out**
+> - Self-service trials need no payment details and aren't available to Government or EDU tenants. Admins can turn them off under **self-service purchases and trials** in the Microsoft 365 admin center
+> - Plan the trial first: define test cases, pick the users who need the features (organizers, compliance specialists), set up templates, customization policies and sensitivity labels, then collect feedback
 
 ### Recording & Transcription
 
@@ -287,7 +313,7 @@ Since **April 1, 2026**, advanced event features are included with **Enterprise 
 | **Q&A** | Optional | Optional | Built-in |
 | **eCDN** | No | No | Yes |
 | **Recording** | Yes | Yes | Yes |
-| **Breakout rooms** | Yes | No | No |
+| **Breakout rooms** | Yes | Yes (up to 1,000 attendees) | No |
 
 ### eCDN for Town Halls
 
@@ -345,6 +371,9 @@ Like webinars, advanced town hall features moved from Teams Premium to **Enterpr
 | Town hall must reach 40,000 employees | **Attendee Capacity Pack** assigned to the organizer |
 | Need to enforce specific meeting settings for executives | Create **meeting template** with locked settings |
 | Large event causing bandwidth issues at office | Enable **Microsoft eCDN** for town halls |
+| Leadership wants to test watermarks and branding with 20 users before buying | **Teams Premium admin trial** (30 days, 25 licenses) from the Teams admin center |
+| Admin needs to approve users' requests for Teams Premium | **Teams Premium dashboard** → **Licenses** → License requests |
+| Webinar organizer wants breakout rooms for 400 attendees | Supported — breakout rooms work in events with **up to 1,000 attendees** |
 
 ---
 

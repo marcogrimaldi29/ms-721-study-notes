@@ -33,12 +33,15 @@ mindmap
       Teams Phone Mobile
       Shared Calling
       Billing Methods
-      Phone Numbers
+      User vs Service Numbers
+      Porting & Acquiring Numbers
+      SMS in Teams
       Call Flow Design
       Emergency Calling
       SBC Selection
+      Analog & SIP Devices
       Compliance Recording
-      Contact Centers
+      Certified Contact Centers
     Plan Certified Devices
       Room Configurations
       BYOD Rooms
@@ -48,6 +51,7 @@ mindmap
       Interoperability CVI
       Resource Accounts
       Intune Enrollment
+      Shared Device Features
     Prepare the Network
       Network Assessment Tool
       eCDN
@@ -70,10 +74,13 @@ mindmap
 | Registration required | ❌ | ✅ | ❌ | ❌ |
 | Large-scale broadcast | ❌ | ❌ | ✅ | ❌ |
 | External customer-facing | ✅ | ✅ | ✅ | ✅ |
-| Breakout rooms | ✅ | ❌ | ❌ | ❌ |
+| Breakout rooms | ✅ | ✅ | ❌ | ❌ |
 | Q&A feature | ✅ | ✅ | ✅ | ❌ |
 | eCDN support | ❌ | ❌ | ✅ | ❌ |
 | Max capacity | 1,000 interactive (+10,000 view-only on Enterprise plans) | 1,000 | 10,000 view-only (up to 100,000 with Attendee Capacity Pack) | Same as a Teams meeting |
+
+> **⚠️ Exam Caveat:**
+> - **Breakout rooms** work in meetings and in events with **up to 1,000 attendees** (webinars) — once attendance goes above 1,000, or in events optimized for large audiences (town halls), they aren't supported
 
 ### Appointments with Microsoft Teams
 
@@ -184,7 +191,7 @@ flowchart LR
 | User Type | Required License |
 |-----------|-----------------|
 | Regular user | Teams Phone Standard + PSTN connectivity (Calling Plan / Operator Connect / Direct Routing) |
-| Shared device (common area phone) | Common Area Phone license |
+| Shared device (common area phone) | **Teams Shared Space** license (named *Teams Shared Devices* until April 2026) — Teams Phone is included; add a Calling Plan only if you don't use Direct Routing or Operator Connect |
 | Resource account (AA/CQ) | Teams Phone Resource Account (free) + Virtual User or Calling Plan if phone number needed |
 
 ### PSTN Connectivity Comparison
@@ -217,6 +224,71 @@ Shared Calling allows multiple users to **share a single phone number** for outb
 | **International Calling Plan** | Includes domestic + international minutes |
 | **Pay-as-you-go (PAYG)** | Per-minute billing — no committed minutes |
 | **Communication Credits** | Pre-paid pool for toll-free and overage minutes |
+
+### User vs. Service Phone Numbers
+
+Every Teams phone number has a **number usage** that decides what it can be assigned to:
+
+| Number Usage | Assigned To | Number Types | Use It For |
+|--------------|-------------|--------------|-----------|
+| **User** (subscriber) | Users and devices — including common area phones and Teams Rooms | Geographic (toll) only | A person's or a device's direct number |
+| **Voice app** (service) | Resource accounts of **auto attendants** and **call queues** | Toll or toll-free | Main line, help desk, sales line |
+| **Conference** (service) | **Audio Conferencing** bridge | Toll or toll-free | Dedicated dial-in numbers for meetings |
+
+> **⚠️ Exam Caveat:**
+> - A **service number** handles **hundreds of simultaneous calls**, while a user number handles only a few. Put a busy main line on a service number behind an auto attendant or call queue, not on a user
+> - **Toll-free** numbers can only be **Voice app** or **Conference** numbers, never user numbers
+> - Toll-free numbers need **Communication Credits** set up and funded before you can reserve and use them
+> - You can change a number's usage later (for example **User → Voice app**), as long as the target has the right licenses
+
+### Porting and Acquiring Phone Numbers
+
+Teams Phone licenses don't include phone numbers. You get them from whoever provides your PSTN connectivity:
+
+| PSTN Connectivity | Get New Numbers | Port Existing Numbers |
+|-------------------|-----------------|-----------------------|
+| **Calling Plan** | Teams admin center → **Voice → Phone numbers → Add** (needs at least one Calling Plan license in the tenant). For a specific area code, use **Get phone number support** | Teams admin center → **Voice → Phone numbers → Port** (port wizard + Letter of Authorization) |
+| **Operator Connect** | Order from the operator, which **uploads** the numbers to your tenant | The operator ports them, then uploads them |
+| **Teams Phone Mobile** | From the mobile operator (SIM-enabled numbers) | The operator ports them |
+| **Direct Routing** | From your own carrier. The numbers stay on your carrier and SBC | Port them to your carrier, then optionally **upload** them to the Teams number inventory (see 03 §3.6) |
+
+**What the port wizard needs (porting to Calling Plans):**
+
+| Item | Details |
+|------|---------|
+| **Letter of Authorization (LOA)** | Signed by the account's **authorized user**, by e-signature or as an uploaded signed copy |
+| **Account details** | Organization name, account number, account PIN, service address. They must match the current carrier's records **exactly** |
+| **Billing telephone number (BTN)** | **Full port**: all numbers including the BTN, and the old account closes. **Partial port**: only some numbers (you can name a replacement BTN) |
+| **Number usage** | Set each number to **User**, **Voice app** or **Conference** (toll-free numbers default to Voice app) |
+| **Status** | **Voice → Phone numbers → Order history**: for example *Pending operator approval*, *Approved (FOCAccepted)*, *Completed* |
+
+> **⚠️ Exam Caveat:**
+> - The losing carrier rejects a port when the **LOA** has missing or wrong details (compare it with the carrier's **Customer Service Record**) or the numbers have a **porting freeze**. Fix it and resubmit
+> - Lead times and rules depend on the country. In the US a port takes about **5–12 business days**, with up to **999 numbers per order**. Some countries don't support partial ports
+> - Moving **Direct Routing** numbers to another connectivity option? Unassign them and **release** them from the Teams inventory (`New-CsOnlineTelephoneNumberReleaseOrder`) before the port
+> - Numbers need an **emergency address**. In the US you assign it with the number; in some countries (for example the UK) you give it when you acquire or port the number
+> - Questions about a port order go to the **Telephone Number Services (TNS) Service Desk**
+
+### SMS in Teams with Calling Plan Numbers
+
+Users with a **Microsoft Calling Plan number** can send and receive SMS in Teams chat:
+
+| Aspect | Details |
+|--------|---------|
+| **Where** | **United States** (including Puerto Rico) and **Canada** only, in the public cloud (not GCC) |
+| **Licenses** | Teams + **Teams Phone** + **Microsoft Calling Plan**, plus a Calling Plan number assigned to a voice-enabled user |
+| **Registration** | US and Canadian business texting runs over the **10DLC** network. Before any number can be enabled, register a **Brand** and a **Campaign** with **The Campaign Registry (TCR)** from the Teams admin center |
+| **Limits** | **One** brand and **one** campaign per tenant. A campaign enables up to **49** numbers by default |
+| **Enable** | **Voice → Phone numbers → Numbers** → select the number → **Enable SMS** (activation can take up to two hours) |
+| **Included messages** | Pooled across the tenant: **200** per Domestic or Domestic + International plan, **100** per Domestic 120, **0** for pay-as-you-go. A message over **160** characters counts as several segments, and overages are billed per segment |
+| **Reporting** | **Analytics & reports → Usage reports → PSTN and SMS Usage** |
+
+> **⚠️ Exam Caveat:**
+> - SMS works only on **Calling Plan** numbers, so not on Direct Routing or Operator Connect numbers, and not on numbers assigned to **resource accounts**
+> - Only **10-digit long codes** can send. Toll-free numbers, short codes and alphanumeric sender IDs aren't supported
+> - SMS works in **one-to-one chats only**, with no MMS, attachments, emojis or GIFs
+> - Brand and campaign registration is required **even if you never send marketing messages**
+> - Overages need a billing method (**Communication Credits** or postpaid billing), which is mandatory for **pay-as-you-go** Calling Plans
 
 ### Call Flow Design — Auto Attendants & Call Queues
 
@@ -302,6 +374,41 @@ flowchart LR
 > - The SBC must present a **trusted TLS certificate** with the SBC FQDN in the CN or SAN
 > - **Location-Based Routing (LBR)** restricts toll bypass based on user's geographic location
 
+### Analog Devices, SIP Handsets, and SIP Devices
+
+| Device | Connect It With | What You Get |
+|--------|-----------------|-------------|
+| **Teams-certified phone** | Signs in to Teams directly | The full Teams calling and meetings experience |
+| **SIP desk phone or IP-DECT handset** (Poly, Yealink, AudioCodes, Cisco with multiplatform firmware…) | **SIP Gateway**: compatible devices only, factory-reset and enrolled from the Teams admin center | Basic calling: make and receive calls, hold, transfer, voicemail with message waiting indicator, DTMF, dial in to meetings |
+| **Analog phone, fax machine, overhead pager** | An **Analog Telephony Adapter (ATA)** behind a **certified SBC** (Direct Routing), or a compatible ATA registered through **SIP Gateway** | Calls between the analog device, Teams users and the PSTN, routed by voice routes through the SBC |
+
+> **⚠️ Exam Caveat:**
+> - With Direct Routing, the **ATA must be supported by the SBC vendor**. Microsoft lists verified ATAs on the certified SBC page
+> - Analog devices behind an ATA **aren't searchable** in Teams, so users dial the device's number
+> - **SIP Gateway** users need **Teams Phone**, PSTN connectivity and a **phone number**, and a SIP device can only call users who have phone numbers
+> - SIP devices can be **call queue agents**, but not with **presence-based routing** (SIP Gateway doesn't publish presence)
+> - SIP Gateway offboards stale devices: signed-in devices after **30 days** offline, signed-out devices after **14 days**
+> - You can mix connectivity: keep Calling Plans or Operator Connect for users and use **Direct Routing only for the analog devices**
+
+### Certified Contact Center Solutions
+
+Teams **auto attendants** and **call queues** (plus the **Queues app** with Teams Premium) cover simple queuing. Recommend a **certified contact center (CCaaS)** solution when the organization needs:
+
+- Business tools and workflows that drive the **customer journey**, such as CRM data and case history
+- **Skill-based routing** and **automated virtual assistants** that gather information before an agent answers
+- **Context for agents**: notes that pull data from several systems before the call starts
+- Routing designed **down to the individual agent**, with measurement of interaction quality
+
+| Integration Model | How It Connects to Teams | Typical Fit |
+|-------------------|--------------------------|-------------|
+| **Connect** | The provider's **certified SBC** + **Direct Routing** (multi-tenant SIP trunking) | An existing CCaaS platform with its own agent client, which can see Teams users' availability and transfer calls to them |
+| **Extend** | Teams client platform and **Graph Cloud Communications APIs**. Agents work **inside Teams**, which is their calling endpoint | Agents use the Teams client, with the CCaaS app in Teams |
+| **Unify** | **Azure Communication Services** (Call Automation, Calling SDK) on Teams calling infrastructure (*Teams Phone extensibility*) | New AI-driven CCaaS apps built natively on Teams Phone |
+
+> **⚠️ Exam Caveat:**
+> - Choose from Microsoft's list of **certified Microsoft Teams solutions for contact centers**. Certification means the solution was checked for quality, compatibility and reliability
+> - In the **Connect** model, agents using the CCaaS client **don't need a Teams Phone license**, but Teams users who receive transferred calls need **Teams Phone** and a **phone number**
+
 ---
 
 ## 🏢 1.3 Plan and Design Teams-Certified Device Solutions
@@ -366,6 +473,33 @@ Each Teams Room device requires a **resource account** with:
 > - **Conditional Access MFA exceptions** are often needed for room accounts that sign in non-interactively
 > - **Intune enrollment** is available only with **Teams Rooms Pro** license
 > - **AOSP** (Android Open Source Project) management is used for Android-based Teams devices
+
+### Advanced Features on Shared Devices
+
+Shared devices sign in with an account licensed with **Teams Shared Space** (named *Teams Shared Devices* until April 2026). One license covers one device:
+
+| Shared Device | Use Case |
+|---------------|----------|
+| **Common area phone** (Teams phone) | Lobby, reception, break room, factory floor |
+| **Android mobile phone** as a shared device | Frontline workers sharing a handset for calls (**no chat** with this license) |
+| **Teams panel** | Outside a BYOD room |
+| **Desk dock** | Bookable desk |
+
+| Feature | What It Adds | How to Turn It On |
+|---------|--------------|-------------------|
+| **Advanced calling** | Call park, **cloud voicemail**, call queues, auto attendants, **group call pickup**, forwarding rules | Teams admin center → **Teams devices → Phones → Configuration profiles** → **Advanced calling**, or on the phone: **Settings → Device settings → Admin only → Calling** |
+| **Hotline (PLAR)** | Lifting the handset auto-dials a set number or contact | Configuration profile → **Enable hotline**, with **Advanced calling off** |
+| **Hot desking** | A user signs in temporarily on a shared phone | **IP phone policy** (`AllowHotDesking`, idle timeout) |
+| **Call park** | Park a call and pick it up from another phone | **Off by default** on common area phones, so assign a **call park policy** |
+| **Calling features** | Private calls, call forwarding, simultaneous ring | **Calling policy** |
+
+> **⚠️ Exam Caveat:**
+> - Common area phones start with the **basic calling** screen. **Advanced calling** has to be turned on, and the phone model must support it
+> - The **Teams Shared Space** license includes **Teams Phone** and **Exchange Online Plan 2** for voicemail only (no email or calendar)
+> - A Teams Shared Space license only allows the **common area phone** interface. Another sign-in mode needs a different license, such as Microsoft 365 E3/E5
+> - Common area phones can't be agents in a call queue that uses **presence-based routing**, because they don't report presence reliably
+> - After assigning a policy, **sign out and back in** on the phone. It can take up to an hour to apply
+> - A Shared Space license used for a **BYOD room or bookable desk** unlocks **3 free Single Space** licenses (4 spaces in all), but not when it's used for a **device**
 
 ---
 
@@ -462,6 +596,13 @@ Controls media behavior based on whether a user is on a managed or external netw
 | Bank customers must book video sessions with advisors and get SMS reminders | **Microsoft Bookings** + **Teams Premium** (SMS notifications) |
 | Managers want to ask an AI what was decided in a meeting they missed | **Microsoft 365 Copilot** (recap alone: Teams Premium *or* Copilot) |
 | Legal team needs watermarks and E2EE on board meetings | **Teams Premium** |
+| US sales reps must text customers from their Teams number | **SMS in Teams** on **Calling Plan** numbers, after registering a Brand and Campaign with TCR |
+| Main line must take dozens of calls at the same time | **Service (Voice app) number** on an auto attendant or call queue resource account |
+| Company switches to Calling Plans and keeps its existing numbers | **Port** them in the Teams admin center with a signed **Letter of Authorization** |
+| Factory still has fax machines and overhead pagers | **ATA** behind a **certified SBC** (Direct Routing) |
+| Existing Poly and Yealink SIP desk phones must work with Teams | **SIP Gateway** (compatible devices, basic calling) |
+| Customer service needs skill-based routing and CRM integration | **Certified contact center solution** (Connect, Extend or Unify model) |
+| Lobby phone needs call park and voicemail | **Teams Shared Space** license + **Advanced calling** on the common area phone |
 
 ---
 
